@@ -1,3 +1,4 @@
+import { dshConsoleHookService } from '../dsh-console/hook-service'
 import type { SFTPWrapper } from 'ssh2'
 import type { AgentHookInstallStatus, AgentHookTarget } from '../../shared/agent-hook-types'
 import { ampHookService } from '../amp/hook-service'
@@ -17,6 +18,8 @@ import { openClaudeHookService } from '../openclaude/hook-service'
 import { zcodeHookService } from '../zcode/hook-service'
 
 export type RemoteManagedHookInstallOptions = {
+  /** Explicit DSH_HOME on the execution host. */
+  dshHomeDir?: string
   /** Explicit CODEX_HOME dir for redirected runtimes (for example WSL's managed runtime home). */
   codexHomeDir?: string
   /** Skip the trust write when a redirected runtime config is seeded by the launch path. */
@@ -43,6 +46,12 @@ type RemoteManagedHookInstaller = readonly [
 ]
 
 const REMOTE_MANAGED_HOOK_INSTALLERS: readonly RemoteManagedHookInstaller[] = [
+  [
+  [
+    'dsh-console',
+    (sftp, remoteHome, options) =>
+      dshConsoleHookService.installRemote(sftp, remoteHome, options?.dshHomeDir)
+  ],
   [
     'claude',
     (sftp, remoteHome, options) =>

@@ -23,6 +23,7 @@ import { normalizeHermesEvent } from './providers/hermes-events'
 import { normalizeDevinEvent } from './providers/devin-events'
 import { normalizeKimiEvent } from './providers/kimi-events'
 import { normalizeZcodeEvent } from './providers/zcode-events'
+import { normalizeDshConsoleEvent } from './providers/dsh-console-events'
 
 export type ProviderDispatchResult = {
   payload: ParsedAgentStatusPayload | null
@@ -50,6 +51,12 @@ export function normalizeProviderEvent(input: {
   let payload: ParsedAgentStatusPayload | null
 
   switch (source) {
+    case 'dsh-console':
+      payload = normalizeDshConsoleEvent(eventName, hookPayload)
+      if (typeof hookPayload.turn_id === 'string') {
+        promptInteractionKey = hookPayload.turn_id
+      }
+      break
     case 'claude':
       payload = normalizeClaudeEvent(state, eventName, promptText, paneKey, hookPayload)
       break

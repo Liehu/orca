@@ -60,7 +60,7 @@ function shouldIgnoreInterruptIntent(
   agentType: AgentStatusEntry['agentType'],
   intent: AgentInterruptInputIntent
 ): boolean {
-  return agentType === 'droid' && intent === 'ctrl-c'
+  return agentType === 'dsh-console' || (agentType === 'droid' && intent === 'ctrl-c')
 }
 
 /** Why: skip a round-trip main will refuse anyway. Scoped to 'working' so Claude's
