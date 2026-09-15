@@ -38,6 +38,7 @@ export type DshNotificationEvidence = {
 /** Observe the real dispatch result; preserve the production handler and native delivery. */
 export async function observeDshNotifications(app: ElectronApplication): Promise<void> {
   await app.evaluate(({ ipcMain }) => {
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: Electron stores registered invoke handlers in this private Map; the requested handler is checked below.
     const handlers = ipcMain as unknown as {
       _invokeHandlers: Map<
         string,
@@ -51,6 +52,7 @@ export async function observeDshNotifications(app: ElectronApplication): Promise
     if (!original) {
       throw new Error('Notification handler is not registered')
     }
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: This test owns the process-local slot and initializes it before the handler can append evidence.
     const root = globalThis as unknown as { __dshNotificationEvidence: DshNotificationEvidence[] }
     root.__dshNotificationEvidence = []
     ipcMain.removeHandler('notifications:dispatch')
@@ -70,6 +72,7 @@ export async function readDshNotifications(
 ): Promise<DshNotificationEvidence[]> {
   return app.evaluate(
     () =>
+      // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: Only observeDshNotifications writes this typed test slot; absence is handled below.
       (globalThis as unknown as { __dshNotificationEvidence?: DshNotificationEvidence[] })
         .__dshNotificationEvidence ?? []
   )

@@ -17,8 +17,8 @@ export function updateDshConsolePatch(source: string | null, enabled: boolean): 
     if (!isMap(item)) {
       continue
     }
-    const targetId = item.get('id', true)
-    if (isScalar(targetId) && (targetId.value as unknown) === DSH_CONSOLE_PLUGIN_ID) {
+    const targetId: unknown = item.get('id', true)
+    if (isScalar(targetId) && targetId.value === DSH_CONSOLE_PLUGIN_ID) {
       throw new Error('DSH profile contains a user override of the Orca plugin entry')
     }
     const insert = item.get('insert', true)

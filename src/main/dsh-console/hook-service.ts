@@ -31,7 +31,7 @@ const localFilesystem: BridgeFilesystem = {
     try {
       return await readFile(path, 'utf8')
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
         return null
       }
       throw error
@@ -61,7 +61,7 @@ function readOptional(path: string): string | null {
   try {
     return readFileSync(path, 'utf8')
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
       return null
     }
     throw error
