@@ -7,7 +7,11 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { getDshConsoleStatusPluginSource } from './status-plugin-source'
 
 // Execute the actual emitted module against the public Cordis event signatures.
-it('observes real-shaped turns and interactive waterfalls without consuming answers', async () => {
+it.each([
+  ['agent/session-start', 'dsh-console-'],
+  ['agent/created', 'dsh-console-'],
+  ['agent/created', 'dsh-console-fork-']
+])('observes %s for %s without consuming native answers', async (lifecycle, prefix) => {
   const directory = await mkdtemp(join(tmpdir(), 'orca-dsh-module-'))
   const messages: Record<string, unknown>[] = []
   const server = createServer((request, response) => {
@@ -23,7 +27,10 @@ it('observes real-shaped turns and interactive waterfalls without consuming answ
     })
   })
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
-  const address = server.address() as { port: number }
+  const address = server.address()
+  if (!address || typeof address === 'string') {
+    throw new Error('Expected TCP listener')
+  }
   vi.stubEnv('ORCA_PANE_KEY', 'test-pane')
   vi.stubEnv('ORCA_AGENT_LAUNCH_TOKEN', 'test-launch')
   vi.stubEnv('ORCA_AGENT_HOOK_TOKEN', 'test-hook-token')
@@ -33,7 +40,7 @@ it('observes real-shaped turns and interactive waterfalls without consuming answ
   await writeFile(file, getDshConsoleStatusPluginSource())
   const plugin = await import(/* @vite-ignore */ pathToFileURL(file).href)
   const handlers = new Map<string, (...args: unknown[]) => unknown>()
-  const id = 'dsh-console-12345678-1234-1234-1234-123456789abc'
+  const id = `${prefix}12345678-1234-1234-1234-123456789abc`
   const agent = { id, session: { id } }
   const ctx = {
     agents: { get: (key: string) => (key === id ? agent : undefined), roots: () => [agent] },
@@ -43,7 +50,10 @@ it('observes real-shaped turns and interactive waterfalls without consuming answ
     plugin.apply(ctx)
     const event = (type: string, data: Record<string, unknown>) =>
       handlers.get('session/event')!(agent.session, { type, data })
+    handlers.get(lifecycle)!({ agent })
     handlers.get('agent/session-start')!({ agent })
+    await vi.waitFor(() => expect(messages).toHaveLength(1))
+    expect(messages[0]).toMatchObject({ hook_event_name: 'session_start', session_id: id })
     event('turn/start', { turn: 1 })
     event('user/message', {
       source: { kind: 'user' },
@@ -79,6 +89,20 @@ it('observes real-shaped turns and interactive waterfalls without consuming answ
     })
     expect(messages.some((message) => message.state === 'blocked')).toBe(true)
     const count = messages.length
+    for (const excludedId of ['dsh-console-completion-', 'dsh-console-side-', 'other-']) {
+      const excluded = {
+        id: `${excludedId}12345678-1234-1234-1234-123456789abc`,
+        session: { id: `${excludedId}12345678-1234-1234-1234-123456789abc` }
+      }
+      ctx.agents.get = () => excluded
+      ctx.agents.roots = () => [excluded]
+      handlers.get(lifecycle)!({ agent: excluded })
+      handlers.get('session/event')!(excluded.session, { type: 'turn/start', data: { turn: 1 } })
+    }
+    ctx.agents.get = () => agent
+    ctx.agents.roots = () => []
+    handlers.get(lifecycle)!({ agent })
+    handlers.get('session/event')!(agent.session, { type: 'turn/start', data: { turn: 2 } })
     handlers.get('session/event')!(
       { id: 'dsh-console-completion-123' },
       { type: 'turn/start', data: { turn: 1 } }
@@ -111,7 +135,11 @@ it('bounds a trickling receiver and closes requests on disposal', async () => {
   vi.stubEnv('ORCA_PANE_KEY', 'test-pane')
   vi.stubEnv('ORCA_AGENT_LAUNCH_TOKEN', 'test-launch')
   vi.stubEnv('ORCA_AGENT_HOOK_TOKEN', 'test-hook-token')
-  vi.stubEnv('ORCA_AGENT_HOOK_PORT', String((server.address() as { port: number }).port))
+  const address = server.address()
+  if (!address || typeof address === 'string') {
+    throw new Error('Expected TCP listener')
+  }
+  vi.stubEnv('ORCA_AGENT_HOOK_PORT', String(address.port))
   vi.stubEnv('ORCA_AGENT_HOOK_ENDPOINT', '')
   const file = join(directory, 'index.mjs')
   await writeFile(file, getDshConsoleStatusPluginSource())

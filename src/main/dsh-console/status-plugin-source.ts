@@ -27,7 +27,7 @@ export function apply(ctx) {
   const contentText = (content) => Array.isArray(content)
     ? content.filter((part) => part?.type === 'text').map((part) => text(part.text)).join('\n').slice(0, 8000)
     : '';
-  const primary = (agent) => agent && /^dsh-console-[0-9a-f-]{36}$/i.test(String(agent.session.id))
+  const primary = (agent) => agent && /^dsh-console-(?:fork-)?[0-9a-f-]{36}$/i.test(String(agent.session.id))
     && ctx.agents.get(agent.id) === agent && ctx.agents.roots().includes(agent);
   const recordFor = (session) => {
     let record = records.get(session.id);
@@ -98,12 +98,15 @@ export function apply(ctx) {
       ...extra
     });
   }
-  ctx.on('agent/session-start', ({ agent }) => {
-    if (!primary(agent)) return;
+  const observeSession = ({ agent }) => {
+    if (!primary(agent) || records.has(agent.session.id)) return;
     const record = recordFor(agent.session);
     // An idle open/resume supplies identity, not a fabricated completed turn.
     publish(record, 'session_start');
-  }, { global: true });
+  };
+  // DSH 0.1.6 uses agent/created; keep the older lifecycle for existing profiles.
+  ctx.on('agent/created', observeSession, { global: true });
+  ctx.on('agent/session-start', observeSession, { global: true });
   ctx.on('session/event', (session, event) => {
     const agent = ctx.agents.get(session.id);
     if (!primary(agent)) return;

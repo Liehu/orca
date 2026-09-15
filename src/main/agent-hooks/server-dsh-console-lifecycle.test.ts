@@ -51,3 +51,32 @@ it.each([true, false])('publishes a DSH Stop event with is_interrupt=%s', (inter
     server.stop()
   }
 })
+
+it.each(['plain-escape', 'ctrl-c'] as const)('rejects DSH %s inference on the host', (intent) => {
+  const server = new AgentHookServer()
+  try {
+    server.ingestRemote(
+      {
+        paneKey: PANE,
+        tabId: 'tab-1',
+        worktreeId: 'wt-1',
+        payload: { state: 'working', prompt: 'running', agentType: 'dsh-console' }
+      },
+      'dsh-host'
+    )
+    const baseline = server.getStatusSnapshot()[0]
+    expect(
+      server.inferInterrupt({
+        paneKey: PANE,
+        baselineUpdatedAt: baseline.receivedAt,
+        baselineStateStartedAt: baseline.stateStartedAt,
+        baselinePrompt: 'running',
+        baselineAgentType: 'dsh-console',
+        intent
+      })
+    ).toBe(false)
+    expect(server.getStatusSnapshot()[0].state).toBe('working')
+  } finally {
+    server.stop()
+  }
+})
