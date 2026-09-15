@@ -1395,6 +1395,7 @@ export class SshRelaySession {
       }
       let result: { errors?: unknown }
       try {
+        // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: mux.request returns a JSON blob; only the optional errors field is read.
         result = (await mux.request(AGENT_HOOK_INSTALL_MANAGED_HOOKS_METHOD, params)) as {
           errors?: unknown
         }
@@ -1408,6 +1409,7 @@ export class SshRelaySession {
           throw error
         }
         // Older relays reject the entire allowlist when any target is unknown.
+        // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: mux.request returns a JSON blob; only the optional errors field is read.
         result = (await mux.request(AGENT_HOOK_INSTALL_MANAGED_HOOKS_METHOD, {
           ...params,
           agents: legacyAgents

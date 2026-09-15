@@ -50,6 +50,7 @@ describe('ZcodeHookService', () => {
     expect(status.state).toBe('installed')
     expect(status.managedHooksPresent).toBe(true)
 
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: JSON.parse returns any; test data is written by this test.
     const config = JSON.parse(readFileSync(configPath(), 'utf-8')) as {
       hooks?: { enabled?: boolean; events?: Record<string, unknown[]>; [key: string]: unknown }
     }
@@ -99,19 +100,23 @@ describe('ZcodeHookService', () => {
       theme?: string
       hooks?: { enabled?: boolean; events?: Record<string, HookDef[]> }
     }
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: JSON.parse returns any; test data is written by this test.
     const installed = JSON.parse(readFileSync(configPath(), 'utf-8')) as Parsed
     expect(installed.theme).toBe('dark')
     const preTool = installed.hooks?.events?.PreToolUse ?? []
     expect(preTool.some((definition) => definition.hooks?.[0]?.command === 'echo user-hook')).toBe(
       true
     )
-    expect(
-      preTool
-        .flatMap((definition) => definition.hooks ?? [])
-        .filter((hook) => hook.command?.includes('zcode-hook'))
-    ).toHaveLength(1)
+    // Why: on Windows the managed command is base64-encoded, so count the appended
+    // managed definition (one per install, deduped across reinstall) instead of
+    // matching a literal 'zcode-hook' substring.
+    const userHookCommands = preTool.filter(
+      (definition) => definition.hooks?.[0]?.command === 'echo user-hook'
+    ).length
+    expect(preTool.length - userHookCommands).toBe(1)
 
     expect(service.remove().state).toBe('not_installed')
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: JSON.parse returns any; test data is written by this test.
     const removed = JSON.parse(readFileSync(configPath(), 'utf-8')) as Parsed
     expect(removed.theme).toBe('dark')
     expect(removed.hooks?.enabled).toBe(false)
@@ -129,12 +134,14 @@ describe('ZcodeHookService', () => {
 
     const service = new ZcodeHookService()
     expect(service.install().state).toBe('installed')
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: JSON.parse returns any; test data is written by this test.
     const installed = JSON.parse(readFileSync(configPath(), 'utf-8')) as {
       hooks?: Record<string, unknown>
     }
     expect(installed.hooks).not.toHaveProperty('orcaPreviousHooksEnabled')
 
     expect(service.remove().state).toBe('not_installed')
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: JSON.parse returns any; test data is written by this test.
     const removed = JSON.parse(readFileSync(configPath(), 'utf-8')) as {
       hooks?: Record<string, unknown>
     }

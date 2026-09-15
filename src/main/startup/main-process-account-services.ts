@@ -101,6 +101,11 @@ export function initializeMainProcessAccountServices(): void {
         )
       })
     }
+    if ('zaiApiKey' in updates) {
+      void state.rateLimits?.refresh().catch((error: unknown) => {
+        console.warn('[rate-limits] Failed to refresh Z.ai usage after a settings change:', error)
+      })
+    }
   })
   state.rateLimits.setClaudeAuthPreparationResolver((target) =>
     state.claudeRuntimeAuth!.prepareForRateLimitFetch(target)
@@ -127,6 +132,9 @@ export function initializeMainProcessAccountServices(): void {
       apiKey
     }
   })
+  state.rateLimits.setZaiConfigResolver(() => ({
+    apiKey: store.getSettings().zaiApiKey
+  }))
   state.rateLimits.setGeminiCliOAuthEnabledResolver(() => store.getSettings().geminiCliOAuthEnabled)
   state.rateLimits.setNetworkProxySettingsResolver(() => store.getSettings())
   state.keybindings = new KeybindingService({

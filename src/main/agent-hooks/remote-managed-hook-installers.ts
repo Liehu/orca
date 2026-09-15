@@ -47,7 +47,6 @@ type RemoteManagedHookInstaller = readonly [
 
 const REMOTE_MANAGED_HOOK_INSTALLERS: readonly RemoteManagedHookInstaller[] = [
   [
-  [
     'dsh-console',
     (sftp, remoteHome, options) =>
       dshConsoleHookService.installRemote(sftp, remoteHome, options?.dshHomeDir)

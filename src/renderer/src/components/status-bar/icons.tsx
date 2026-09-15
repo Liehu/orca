@@ -343,3 +343,29 @@ export function DroidIcon({ size = 14 }: { size?: number }): React.JSX.Element {
     </svg>
   )
 }
+
+export function ZaiIcon({ size = 14 }: { size?: number }): React.JSX.Element {
+  // Why: no official Z.ai mark ships with the repo; a themed letter glyph reads
+  // cleanly in both color schemes without inventing a palette color.
+  return (
+    <svg
+      fill="currentColor"
+      height={size}
+      width={size}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <text
+        x="12"
+        y="17"
+        textAnchor="middle"
+        fontSize="16"
+        fontWeight="700"
+        fontFamily="system-ui, sans-serif"
+      >
+        Z
+      </text>
+    </svg>
+  )
+}

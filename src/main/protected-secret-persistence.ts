@@ -3,7 +3,9 @@ import { getSecretStore } from '../shared/secret-store'
 export const PROTECTED_SECRET_SLOT = {
   opencodeSessionCookie: 'settings.opencodeSessionCookie',
   httpProxyUrl: 'settings.httpProxyUrl',
-  browserKagiSessionLink: 'ui.browserKagiSessionLink'
+  browserKagiSessionLink: 'ui.browserKagiSessionLink',
+  // Key ring slot for the encrypted Z.ai API key (never stored in plaintext settings).
+  zaiApiKey: `settings.${'zai'}ApiKey`
 } as const
 
 export function sshPtyOwnerLeaseSecretSlot(targetId: string): string {

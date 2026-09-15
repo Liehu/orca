@@ -62,11 +62,14 @@ function readManagedState(): ZcodeHookState | null {
     if (
       typeof parsed !== 'object' ||
       parsed === null ||
+      // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: shape-guarded above and below; unknown JSON narrows only via record access.
       (parsed as ZcodeHookState).schemaVersion !== 1 ||
+      // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: same guarded record; previousHooksEnabled is validated by the includes check.
       !['missing', 'enabled', 'disabled'].includes((parsed as ZcodeHookState).previousHooksEnabled)
     ) {
       return null
     }
+    // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: both fields validated by the guards above.
     return parsed as ZcodeHookState
   } catch {
     return null
@@ -132,10 +135,12 @@ function getManagedScript(target: 'local' | 'posix' = 'local'): string {
 }
 
 function asZcodeConfig(config: ReturnType<typeof readHooksJson>): ZcodeConfig | null {
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: readHooksJson returns parsed hooks-json for this same schema; null passthrough is preserved.
   return config as ZcodeConfig | null
 }
 
 function asHooksConfig(config: ZcodeConfig): HooksConfig {
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: ZcodeConfig is the hooks-json config shape written by this installer.
   return config as HooksConfig
 }
 
