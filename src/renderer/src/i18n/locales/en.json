@@ -3740,7 +3740,8 @@
             "grokUsageMenu": "Grok Usage",
             "floatingTerminalNewActivity": "{{label}}, new activity",
             "codexSignInSuccess": "Signed in to Codex",
-            "codexSignInError": "Codex sign-in failed. Please try again."
+            "codexSignInError": "Codex sign-in failed. Please try again.",
+            "zaiUsageMenu": "Z.ai Usage"
           },
           "StatusBarUsageEmptyCta": {
             "828c764a79": "Connect an account",
@@ -6509,7 +6510,16 @@
           "4e32e030b2": "Stored locally. Orca sends it only to platform.minimax.io for usage refreshes.",
           "5e08b0fe57": "Stored locally and sent only to platform.minimax.io for usage refreshes.",
           "79418c782a": "Open platform.minimax.io/console/usage in your browser, sign in, then copy the Cookie request header from DevTools (Network → any remains request → Cookie).",
-          "f5d8d2a6a1": "Open platform.minimax.io/console/usage in your browser and sign in."
+          "f5d8d2a6a1": "Open platform.minimax.io/console/usage in your browser and sign in.",
+          "zai": {
+            "title": "Z.ai",
+            "subtitle": "Configure Z.ai GLM Coding Plan quota tracking.",
+            "apiKeyTitle": "Z.ai API Key",
+            "apiKeyDescription": "Paste your Z.ai API key to show GLM Coding Plan quota in the status bar.",
+            "apiKeyLabel": "API key",
+            "apiKeyPlaceholder": "Z.ai API key (z.ai API console)",
+            "apiKeyHint": "Create the key in the Z.ai API console. It is stored encrypted on this device and is only used to read plan quota."
+          }
         },
         "AdvancedPane": {
           "40b29e0bf3": "Restart",
@@ -8887,7 +8897,14 @@
             "b2c4e7f1a8": "endpoint",
             "3a9b6d2c4e": "api key",
             "5d8f1a3b7c": "china",
-            "7e2a4b8c1d": "overseas"
+            "7e2a4b8c1d": "overseas",
+            "zai": {
+              "apiKey": "Z.ai API Key",
+              "apiKeyDesc": "Paste your Z.ai API key to show GLM Coding Plan quota in the status bar.",
+              "kwZai": "zai",
+              "kwGlm": "glm",
+              "kwPlan": "coding plan"
+            }
           }
         },
         "advanced": {
