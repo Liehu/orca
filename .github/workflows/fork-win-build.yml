@@ -1,0 +1,118 @@
+name: Fork Windows Build
+
+# Why: dev-channel-win-build.yml is gated to stablyai/orca and publishes into a
+# dev-channel release via SignPath-adjacent secrets a fork does not have. This
+# variant keeps the same Windows packaging leg but skips the release publish and
+# uploads the unsigned installer as a workflow artifact instead.
+#
+# Manual dispatch only:
+#
+#   gh workflow run fork-win-build.yml --ref feat/zcode-dsh-support
+#
+# The installer lands in the run's Artifacts (orca-windows-installer).
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or SHA to build (defaults to the dispatching branch)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fork-win-build-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-win:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+
+    steps:
+      - name: Checkout the built ref
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      # pnpm must be on PATH before setup-node so setup-node can locate the store.
+      - name: Setup pnpm
+        uses: pnpm/setup@v2
+        with:
+          install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+          cache: pnpm
+
+      # Caches the Electron binary and electron-builder's tool downloads (nsis,
+      # winCodeSign). Same key shape as dev-channel-win-build.
+      - name: Cache electron-builder downloads
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~\AppData\Local\electron\Cache
+            ~\AppData\Local\electron-builder\Cache
+          key: electron-builder-win-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            electron-builder-win-
+
+      # Why retried: pnpm install triggers electron's postinstall, which pulls the
+      # Electron binary from GitHub release assets, and that CDN returns transient
+      # 504s often enough to lose a build to it.
+      # Why host-only: this job packages only for its own runner OS and
+      # architecture, so the default host-scoped install is deliberate.
+      - name: Install dependencies
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          retry_wait_seconds: 30
+          command: pnpm install --frozen-lockfile
+
+      # Why here and not in build: only a Windows runner can compile it, and
+      # arm64 cross-compiles from this same x64 agent.
+      - name: Build Windows process-table addon for the relay
+        shell: bash
+        run: |
+          node config/scripts/build-windows-process-tree-relay-addon.mjs --arch=x64
+          node config/scripts/build-windows-process-tree-relay-addon.mjs --arch=arm64
+
+      - name: Build app
+        shell: bash
+        run: pnpm build:release
+        env:
+          # Fail the build rather than ship a relay that silently falls back to
+          # the PowerShell scan on every Windows SSH host.
+          ORCA_REQUIRE_RELAY_NATIVE_ADDONS: 'x64,arm64'
+          # Why unset ORCA_BUILD_IDENTITY: telemetry's transport gate accepts only
+          # 'stable' or 'rc', so leaving it unset keeps fork builds silent.
+          ORCA_DIAGNOSTICS_TOKEN_URL: https://www.onorca.dev/diagnostics/token
+
+      # --publish never keeps electron-builder from needing release credentials;
+      # the installer is collected as an artifact below instead.
+      - name: Package Windows installer
+        uses: nick-fields/retry@v4
+        with:
+          timeout_minutes: 30
+          max_attempts: 2
+          retry_wait_seconds: 30
+          command: node config/scripts/ensure-native-runtime.mjs --runtime=electron; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; pnpm exec electron-builder --config config/electron-builder.config.cjs --win --publish never
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: orca-windows-installer
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest.yml
+          if-no-files-found: error
+          retention-days: 14
