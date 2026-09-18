@@ -1,5 +1,6 @@
 import type { TuiAgent } from './tui-agent'
 import { getOrcaCliCommandNameForPlatform } from './orca-cli-command-name'
+import { ZCODE_TUI_AGENT_CONFIG } from './tui-agent-config-zcode'
 
 export type AgentPromptInjectionMode =
   | 'argv'
@@ -67,6 +68,12 @@ function resolveTuiAgentConfig(source: TuiAgentConfigSource): TuiAgentConfig {
 }
 
 const TUI_AGENT_CONFIG_SOURCE: Record<TuiAgent, TuiAgentConfigSource> = {
+  'dsh-console': {
+    detectCmd: 'dsh-console',
+    detectRequiredCommands: ['dsh', 'pnpm', 'node'],
+    // Why: the published launcher forwards --prompt to its interactive Cordis runner.
+    promptInjectionMode: 'flag-prompt'
+  },
   claude: {
     detectCmd: 'claude',
     promptInjectionMode: 'argv',
@@ -288,7 +295,8 @@ const TUI_AGENT_CONFIG_SOURCE: Record<TuiAgent, TuiAgentConfigSource> = {
     detectCmd: 'devin',
     // Why: `devin -- <prompt>` auto-submits immediately (docs.devin.ai/cli), so start the REPL with no argv prompt.
     promptInjectionMode: 'stdin-after-start'
-  }
+  },
+  zcode: ZCODE_TUI_AGENT_CONFIG
 }
 
 export const TUI_AGENT_CONFIG: Record<TuiAgent, TuiAgentConfig> = Object.fromEntries(

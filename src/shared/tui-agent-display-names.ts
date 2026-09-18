@@ -6,6 +6,7 @@ import type { TuiAgent } from './tui-agent'
  * (`agent-catalog.tsx`) stays the source of truth for UI labels; keep these
  * in sync with its `label` values when adding an agent. */
 export const TUI_AGENT_DISPLAY_NAMES: Record<TuiAgent, string> = {
+  'dsh-console': 'DSH Console',
   claude: 'Claude',
   'claude-agent-teams': 'Claude Agent Teams',
   openclaude: 'OpenClaude',
@@ -41,7 +42,8 @@ export const TUI_AGENT_DISPLAY_NAMES: Record<TuiAgent, string> = {
   hermes: 'Hermes',
   openclaw: 'OpenClaw',
   copilot: 'GitHub Copilot',
-  grok: 'Grok'
+  grok: 'Grok',
+  zcode: 'ZCode'
 }
 
 /** Canonical agent id list derived from the exhaustive display-name record,

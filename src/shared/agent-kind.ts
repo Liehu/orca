@@ -14,6 +14,7 @@ import type { TuiAgent } from './tui-agent'
 type ConcreteAgentKind = Exclude<AgentKind, 'other'>
 
 const TUI_AGENT_KIND_BY_AGENT = {
+  'dsh-console': 'dsh-console',
   claude: 'claude-code',
   'claude-agent-teams': 'claude-agent-teams',
   openclaude: 'openclaude',
@@ -49,7 +50,8 @@ const TUI_AGENT_KIND_BY_AGENT = {
   grok: 'grok',
   devin: 'devin',
   ante: 'ante',
-  trae: 'trae'
+  trae: 'trae',
+  zcode: 'zcode'
 } satisfies Record<TuiAgent, ConcreteAgentKind>
 
 // Why: `satisfies Record<TuiAgent, …>` makes the lookup exhaustive at compile

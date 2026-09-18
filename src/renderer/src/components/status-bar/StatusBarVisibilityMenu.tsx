@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { AgentIcon } from '@/lib/agent-catalog'
-import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon } from './icons'
+import { ClaudeIcon, GeminiIcon, MiniMaxIcon, OpenAIIcon, OpenCodeGoIcon, ZaiIcon } from './icons'
 import { translate } from '@/i18n/i18n'
 import { isStatusBarItemAvailable } from './status-bar-agent-gating'
 import type { StatusBarController } from './use-status-bar-controller'
@@ -98,6 +98,16 @@ export function StatusBarVisibilityMenu({
         >
           <OpenCodeGoIcon size={14} />
           {translate('auto.components.status.bar.StatusBar.8c86cd77b0', 'OpenCode Go Usage')}
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuCheckboxItem
+          checked={statusBarItems.includes('zai')}
+          onCheckedChange={() => {
+            recordFeatureInteraction('usage-tracking')
+            toggleStatusBarItem('zai')
+          }}
+        >
+          <ZaiIcon size={14} />
+          {translate('auto.components.status.bar.StatusBar.zaiUsageMenu', 'Z.ai Usage')}
         </DropdownMenuCheckboxItem>
         {isStatusBarItemAvailable('kimi', detectedAgentIds) && (
           <DropdownMenuCheckboxItem

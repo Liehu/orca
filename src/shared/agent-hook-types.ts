@@ -4,6 +4,7 @@
 // to keep a single source of truth for the version string and status contract.
 
 export const AGENT_HOOK_TARGETS = [
+  'dsh-console',
   'claude',
   'openclaude',
   'codex',
@@ -17,7 +18,8 @@ export const AGENT_HOOK_TARGETS = [
   'copilot',
   'hermes',
   'devin',
-  'kimi'
+  'kimi',
+  'zcode'
 ] as const
 export type AgentHookTarget = (typeof AGENT_HOOK_TARGETS)[number]
 

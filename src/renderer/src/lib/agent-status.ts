@@ -98,6 +98,7 @@ export { formatAgentTypeLabel } from '../../../shared/agent-type-label'
 
 // Why: Record<TuiAgent, true> (not a Set) forces a build error if a TuiAgent member is added without being listed here.
 const ICONABLE_AGENT_TYPES: Record<TuiAgent, true> = {
+  'dsh-console': true,
   claude: true,
   'claude-agent-teams': true,
   openclaude: true,
@@ -133,7 +134,8 @@ const ICONABLE_AGENT_TYPES: Record<TuiAgent, true> = {
   grok: true,
   devin: true,
   ante: true,
-  trae: true
+  trae: true,
+  zcode: true
 }
 
 // Why: return null (not a 'claude' fallback) for unknown so Codex panes don't flash the Claude icon before the hook fires.

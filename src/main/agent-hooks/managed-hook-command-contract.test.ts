@@ -141,13 +141,15 @@ const buildersByAgent = new Map<string, CommandBuilders>([
       local: (path) => [wrapPosixHookCommand(path.replaceAll('\\', '/'))],
       remote: (path) => [wrapPosixHookCommand(path)]
     }
-  ]
+  ],
+  ['zcode', standardCommands]
 ])
 
 // Why: as in MANAGED_AGENT_HOOK_SCRIPT_REFRESHERS, native plugin source has no shell command to scan.
 const exemptionsByAgent = new Map([
   ['amp', 'Native TypeScript plugin source; no shell hook command'],
-  ['hermes', 'Native Python plugin source; no shell hook command']
+  ['hermes', 'Native Python plugin source; no shell hook command'],
+  ['dsh-console', 'DSH Console Cordis status plugin source; no shell hook command']
 ])
 
 describe('managed hook command contract', () => {

@@ -35,6 +35,7 @@ import type { AgentHookTarget } from './agent-hook-types'
 // without dragging Electron in (the shared listener module is the only place
 // that consumes it from the relay side).
 const AGENT_HOOK_SOURCES = [
+  'dsh-console',
   'claude',
   'codex',
   'gemini',
@@ -52,7 +53,8 @@ const AGENT_HOOK_SOURCES = [
   'copilot',
   'hermes',
   'devin',
-  'kimi'
+  'kimi',
+  'zcode'
 ] as const
 
 export type AgentHookSource = (typeof AGENT_HOOK_SOURCES)[number]

@@ -12,6 +12,7 @@ import type { TuiAgent } from './tui-agent'
  * follows Orca's own rule that OpenClaude reads Claude-owned roots.
  */
 export const SKILLS_CLI_AGENT_KEY_BY_TUI_AGENT = {
+  'dsh-console': null,
   claude: 'claude-code',
   'claude-agent-teams': 'claude-code',
   // Why: Orca states OpenClaude reads Claude-owned roots (native-chat-agent-profiles).
@@ -49,7 +50,9 @@ export const SKILLS_CLI_AGENT_KEY_BY_TUI_AGENT = {
   devin: 'devin',
   ante: null,
   // Why: Orca detects trae by `traecli`, an alias only TRAE CN ships.
-  trae: 'trae-cn'
+  trae: 'trae-cn',
+  // Why: the community skills CLI has no verified ZCode-specific target; ZCode reads the universal .agents root.
+  zcode: null
 } satisfies Record<TuiAgent, string | null>
 
 /**
